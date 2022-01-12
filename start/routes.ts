@@ -20,6 +20,8 @@
 
 import Route from "@ioc:Adonis/Core/Route";
 
-Route.get("/", () => {
-  return { hello: "world" };
+Route.get("/", ({ view }) => {
+  // ctx.response.badRequest({ errorMessage: "Invalid" });
+  // return { hello: "world" };
+  return view.render("hutao");
 });
