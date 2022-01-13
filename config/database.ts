@@ -5,8 +5,8 @@
  * file.
  */
 
-import Env from '@ioc:Adonis/Core/Env'
-import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
+import Env from "@ioc:Adonis/Core/Env";
+import { DatabaseConfig } from "@ioc:Adonis/Lucid/Database";
 
 const databaseConfig: DatabaseConfig = {
   /*
@@ -19,7 +19,7 @@ const databaseConfig: DatabaseConfig = {
   | file.
   |
   */
-  connection: Env.get('DB_CONNECTION'),
+  connection: Env.get("DB_CONNECTION"),
 
   connections: {
     /*
@@ -34,21 +34,21 @@ const databaseConfig: DatabaseConfig = {
     |
     */
     mssql: {
-      client: 'mssql',
+      client: "mssql",
       connection: {
-        user: Env.get('MSSQL_USER'),
-        port: Env.get('MSSQL_PORT'),
-        server: Env.get('MSSQL_SERVER'),
-        password: Env.get('MSSQL_PASSWORD', ''),
-        database: Env.get('MSSQL_DB_NAME'),
+        user: Env.get("MSSQL_USER"),
+        port: parseInt(Env.get("MSSQL_PORT")),
+        server: Env.get("MSSQL_SERVER"),
+        password: Env.get("MSSQL_PASSWORD", ""),
+        database: Env.get("MSSQL_DB_NAME"),
       },
       migrations: {
         naturalSort: true,
       },
       healthCheck: false,
       debug: false,
-    }
-  }
-}
+    },
+  },
+};
 
-export default databaseConfig
+export default databaseConfig;

@@ -1,5 +1,7 @@
 import Route from "@ioc:Adonis/Core/Route";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 Route.post("auth/checkemail", async (ctx) => {
-  return true;
+  ctx;
+  return Database.from("users").select("*");
 });
