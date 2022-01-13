@@ -1,8 +1,9 @@
 export const errorMessage = {
   auth: {
     invalidEmail: "Please enter a valid email address.",
-    invalidPassword: "Please enter a valid password.",
     invalidCredentials: "Invalid credentials.",
+    passwordTooShort: "Password must be at least 6 characters.",
+    passwordTooLong: "Password is too long.",
     emailInUse: "This email address is already in use.",
   },
 };
