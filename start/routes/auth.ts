@@ -22,4 +22,21 @@ Route.post("auth/checkemail", async (ctx) => {
   return { emailExists };
 });
 
-Route.post("auth/signup", async (ctx) => {});
+Route.post("auth/signup", async (ctx) => {
+  const email = ctx.request.input("email")?.toLowerCase().trim();
+  const validator = require("email-validator");
+  if (!validator.validate(email))
+    return ctx.response.badRequest({
+      errorMessage: errorMessage.auth.invalidEmail,
+    });
+
+  const password = ctx.request.input("password");
+  if (password.length < 6)
+    return ctx.response.badRequest({
+      errorMessage: errorMessage.auth.passwordTooShort,
+    });
+  if (password.length > 128)
+    return ctx.response.badRequest({
+      errorMessage: errorMessage.auth.passwordTooLong,
+    });
+});
