@@ -25,3 +25,5 @@ Route.get("/", ({ view }) => {
   // return { hello: "world" };
   return view.render("hutao");
 });
+
+import "./routes/auth";

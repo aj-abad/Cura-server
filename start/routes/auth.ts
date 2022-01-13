@@ -1,5 +1,6 @@
 import Route from "@ioc:Adonis/Core/Route";
 
 Route.post("auth/checkemail", async (ctx) => {
-  ctx.response.send(true);
+  console.log(ctx.request.body().email);
+  return true;
 });
