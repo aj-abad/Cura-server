@@ -1,8 +1,11 @@
 import Route from "@ioc:Adonis/Core/Route";
 import Database from "@ioc:Adonis/Lucid/Database";
-import { encrypt, hash } from "../../app/modules/cryptoutils";
-import { errorMessage } from "../../app/modules/errormessages";
-import User from "App/Models/User";
+import { encrypt, hash } from "App/Modules/cryptoutils";
+import { errorMessage } from "App/Modules/errormessages";
+import PendingSignup from "App/Models/PendingSignup";
+import { v4 as uuid } from "uuid";
+import { generateCode } from "App/Modules/stringutils";
+import { DateTime } from "luxon";
 
 Route.post("auth/checkemail", async (ctx) => {
   const email = ctx.request.input("email")?.toLowerCase().trim();
@@ -40,7 +43,17 @@ Route.post("auth/signup", async ({ request, response }) => {
     return response.badRequest({
       errorMessage: errorMessage.auth.passwordTooLong,
     });
-  //TODO actual signup logic
+
+  const passwordHash = hash(password);
+  const newSignup = new PendingSignup();
+  newSignup.pendingSignupId = uuid();
+  newSignup.email = encrypt(email);
+  newSignup.password = passwordHash;
+  newSignup.code = generateCode(5);
+  newSignup.dateCreated = DateTime.utc();
+  await newSignup.save();
+
+  return response.created();
 });
 
 Route.post("auth/signin", async ({ request, response }) => {
