@@ -46,7 +46,7 @@ Route.group(() => {
 
     const encryptedEmail = encrypt(email);
     const codeSentSince = DateTime.utc()
-      .plus({ minutes: Env.get("VERIFICATION_CODE_COOLDOWN_MINUTES") })
+      .minus({ minutes: Env.get("VERIFICATION_CODE_COOLDOWN_MINUTES") })
       .toString();
     const recentCodeExists = !!(await Database.from("PendingSignups")
       .where("email", encryptedEmail)
@@ -68,7 +68,7 @@ Route.group(() => {
       //TODO send email
     }
 
-    return response.created();
+    return recentCodeExists ? null : response.created();
   });
 
   Route.post("auth/signin", async ({ request, response }) => {
