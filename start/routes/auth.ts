@@ -7,6 +7,7 @@ import { v4 as uuid } from "uuid";
 import { generateCode } from "App/Modules/stringutils";
 import { DateTime } from "luxon";
 import Env from "@ioc:Adonis/Core/Env";
+import { sendSignupVerificationMail } from "App/Modules/emailutils";
 
 Route.group(() => {
   Route.post("checkemail", async (ctx) => {
@@ -75,6 +76,7 @@ Route.group(() => {
 
       await newSignup.save();
       //TODO send email
+      sendSignupVerificationMail(email, newSignup.code);
     }
     return recentCodeExists ? response.ok(null) : response.created();
   });
