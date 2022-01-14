@@ -9,6 +9,9 @@ export default class User extends BaseModel {
   public userStatusId: number;
 
   @column()
+  public userTypeId: number;
+
+  @column()
   public email: string;
 
   @column()
