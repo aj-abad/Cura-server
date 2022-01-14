@@ -6,6 +6,7 @@ import PendingSignup from "App/Models/PendingSignup";
 import { v4 as uuid } from "uuid";
 import { generateCode } from "App/Modules/stringutils";
 import { DateTime } from "luxon";
+import Env from "@ioc:Adonis/Core/Env";
 
 Route.group(() => {
   Route.post("checkemail", async (ctx) => {
@@ -18,7 +19,7 @@ Route.group(() => {
 
     const emailExists = !!(await Database.from("Users")
       .where("email", encrypt(email))
-      .where("UserStatusId", ">", 0)
+      .andWhere("UserStatusId", ">", 0)
       .select(1)
       .first());
 
@@ -43,15 +44,30 @@ Route.group(() => {
         errorMessage: errorMessage.auth.passwordTooLong,
       });
 
-    const passwordHash = hash(password);
-    const newSignup = new PendingSignup();
-    newSignup.pendingSignupId = uuid();
-    newSignup.email = encrypt(email);
-    newSignup.password = passwordHash;
-    newSignup.code = generateCode(5);
-    newSignup.dateCreated = DateTime.utc();
-    await newSignup.save();
-    //TODO send email
+    const encryptedEmail = encrypt(email);
+    const codeSentSince = DateTime.utc()
+      .plus({ minutes: Env.get("VERIFICATION_CODE_COOLDOWN_MINUTES") })
+      .toString();
+    const recentCodeExists = !!(await Database.from("PendingSignups")
+      .where("email", encryptedEmail)
+      .andWhere("dateCreated", ">=", codeSentSince)
+      .select(1)
+      .first());
+
+    if (!recentCodeExists) {
+      const passwordHash = hash(password);
+      const newSignup = new PendingSignup().fill({
+        pendingSignupId: uuid(),
+        email: encryptedEmail,
+        password: passwordHash,
+        code: generateCode(5),
+        dateCreated: DateTime.utc(),
+      });
+
+      await newSignup.save();
+      //TODO send email
+    }
+
     return response.created();
   });
 
