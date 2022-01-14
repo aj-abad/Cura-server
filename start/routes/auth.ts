@@ -68,7 +68,7 @@ Route.group(() => {
       //TODO send email
     }
 
-    return recentCodeExists ? null : response.created();
+    return recentCodeExists ? response.ok(null) : response.created();
   });
 
   Route.post("auth/signin", async ({ request, response }) => {
