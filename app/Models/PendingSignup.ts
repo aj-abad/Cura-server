@@ -9,6 +9,9 @@ export default class PendingSignup extends BaseModel {
   public email: string;
 
   @column()
+  public password: string;
+
+  @column()
   public code: string;
 
   @column()
