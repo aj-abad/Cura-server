@@ -5,13 +5,13 @@ export default class UpdatePendingSignupsAddPasswords extends BaseSchema {
 
   public async up() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.string("password").notNullable();
+      table.string("Password").notNullable();
     });
   }
 
   public async down() {
     this.schema.alterTable(this.tableName, (table) => {
-      table.dropColumn("password");
+      table.dropColumn("Password");
     });
   }
 }
