@@ -5,7 +5,6 @@ export default class AppProvider {
 
   public register() {
     // Register your own bindings
-    import("../start/namingstrategy");
   }
 
   public async boot() {

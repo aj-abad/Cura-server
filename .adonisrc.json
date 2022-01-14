@@ -15,6 +15,7 @@
   },
   "preloads": [
     "./start/routes",
+    "./start/namingstrategy",
     "./start/kernel"
   ],
   "providers": [
