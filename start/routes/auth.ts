@@ -62,6 +62,9 @@ Route.group(() => {
       record.password = passwordHash;
       await record.save();
     } else {
+      await Database.from("PendingSignups")
+        .where("email", encryptedEmail)
+        .delete();
       const newSignup = new PendingSignup().fill({
         pendingSignupId: uuid(),
         email: encryptedEmail,
