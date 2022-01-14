@@ -45,6 +45,7 @@ Route.group(() => {
       });
 
     const encryptedEmail = encrypt(email);
+    const passwordHash = hash(password);
     const codeSentSince = DateTime.utc()
       .minus({ minutes: Env.get("VERIFICATION_CODE_COOLDOWN_MINUTES") })
       .toString();
@@ -54,8 +55,13 @@ Route.group(() => {
       .select(1)
       .first());
 
-    if (!recentCodeExists) {
-      const passwordHash = hash(password);
+    if (recentCodeExists) {
+      const record: PendingSignup = await Database.from("PendingSignups")
+        .where("email", encryptedEmail)
+        .first();
+      record.password = passwordHash;
+      await record.save();
+    } else {
       const newSignup = new PendingSignup().fill({
         pendingSignupId: uuid(),
         email: encryptedEmail,
@@ -67,7 +73,6 @@ Route.group(() => {
       await newSignup.save();
       //TODO send email
     }
-
     return recentCodeExists ? response.ok(null) : response.created();
   });
 
