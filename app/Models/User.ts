@@ -1,4 +1,5 @@
 import { BaseModel, column, computed } from "@ioc:Adonis/Lucid/Orm";
+import { DateTime } from "luxon";
 import { decrypt } from "../modules/cryptoutils";
 
 export default class User extends BaseModel {
@@ -25,6 +26,12 @@ export default class User extends BaseModel {
 
   @column()
   public mobile: string;
+
+  @column.dateTime({ autoCreate: true })
+  public dateRegistered: DateTime;
+
+  @column.dateTime({ autoUpdate: true })
+  public dateUpdated: DateTime;
 
   @computed()
   public get decryptedEmail(): string {
