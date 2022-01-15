@@ -84,11 +84,11 @@ export default class User extends BaseModel {
     }
   }
   @afterFetch()
-  public static async decryptValues(users[]: User[]){
-    users.forEach((user:User)=>{
+  public static async decryptValues(users: User[]) {
+    users.forEach((user: User) => {
       user.firstName = Encryption.decrypt(user.firstName)!;
       user.lastName = Encryption.decrypt(user.lastName)!;
       user.mobile = Encryption.decrypt(user.mobile)!;
-    })
+    });
   }
 }
