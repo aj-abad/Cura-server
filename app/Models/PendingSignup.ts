@@ -3,7 +3,6 @@ import {
   column,
   beforeSave,
   beforeCreate,
-  afterFind,
 } from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
 import Hash from "@ioc:Adonis/Core/Hash";
