@@ -5,10 +5,10 @@ import Database from "@ioc:Adonis/Lucid/Database";
 
 class CamelCaseNamingStrategy extends SnakeCaseNamingStrategy {
   public tableName(model: typeof BaseModel) {
-    return string.pluralize(string.camelCase(model.name));
+    return string.pluralize(string.pascalCase(model.name));
   }
   public columnName(_model: typeof BaseModel, propertyName: string) {
-    return string.camelCase(propertyName);
+    return string.pascalCase(propertyName);
   }
   public serializedName(_model: typeof BaseModel, propertyName: string) {
     return string.camelCase(propertyName);
@@ -30,25 +30,25 @@ class CamelCaseNamingStrategy extends SnakeCaseNamingStrategy {
     relatedModel: typeof BaseModel
   ) {
     if (relation === "belongsTo") {
-      return string.camelCase(
+      return string.pascalCase(
         `${relatedModel.name}_${relatedModel.primaryKey}`
       );
     }
 
-    return string.camelCase(`${model.name}_${model.primaryKey}`);
+    return string.pascalCase(`${model.name}_${model.primaryKey}`);
   }
   public relationPivotTable(
     _relation: "manyToMany",
     model: typeof BaseModel,
     relatedModel: typeof BaseModel
   ) {
-    return string.camelCase([relatedModel.name, model.name].sort().join("_"));
+    return string.pascalCase([relatedModel.name, model.name].sort().join("_"));
   }
   public relationPivotForeignKey(
     _relation: "manyToMany",
     model: typeof BaseModel
   ) {
-    return string.camelCase(`${model.name}_${model.primaryKey}`);
+    return string.pascalCase(`${model.name}_${model.primaryKey}`);
   }
   public paginationMetaKeys() {
     return {
