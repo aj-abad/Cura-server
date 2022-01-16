@@ -10,40 +10,34 @@ import Encryption from "@ioc:Adonis/Core/Encryption";
 import { DateTime } from "luxon";
 import Hash from "@ioc:Adonis/Core/Hash";
 import { v4 as uuid } from "uuid";
+
 export default class User extends BaseModel {
+  public static selfAssignPrimaryKey = true;
   @column({
     isPrimary: true,
   })
-  public userId: string;
+  public UserId: string;
 
   @column()
-  public userStatusId: number;
+  public UserStatusId: number;
 
   @column()
-  public userTypeId: number;
+  public UserTypeId: number;
 
-  public email: string;
+  @column()
+  public Email: string;
 
   @column({ serializeAs: null })
-  public password: string;
+  public Password: string;
 
-  @column({
-    prepare: (name: string) => Encryption.encrypt(name.trim()),
-    consume: (name: string) => Encryption.decrypt(name),
-  })
-  public firstName: string;
+  @column()
+  public FirstName: string;
 
-  @column({
-    prepare: (name: string) => Encryption.encrypt(name.trim()),
-    consume: (name: string) => Encryption.decrypt(name),
-  })
-  public lastName: string;
+  @column()
+  public LastName: string;
 
-  @column({
-    prepare: (mobile: string) => Encryption.encrypt(mobile.trim()),
-    consume: (mobile: string) => Encryption.decrypt(mobile),
-  })
-  public mobile: string;
+  @column()
+  public Mobile: string;
 
   @column.dateTime({
     autoCreate: true,
@@ -56,7 +50,7 @@ export default class User extends BaseModel {
 
   @beforeCreate()
   public static async generateId(user: User) {
-    user.userId = uuid();
+    user.UserId = uuid();
   }
 
   @beforeFind()
@@ -67,28 +61,28 @@ export default class User extends BaseModel {
   @beforeSave()
   public static async hashPassword(user: User) {
     if (user.$dirty.password) {
-      user.password = await Hash.make(user.password);
+      user.Password = await Hash.make(user.Password);
     }
   }
 
   @beforeSave()
-  public static async encryptValues(user: User) {
-    if (user.$dirty.firstName) {
-      user.firstName = Encryption.encrypt(user.firstName.trim());
+  public static encryptValues(user: User) {
+    if (user.$dirty.FirstName) {
+      user.FirstName = Encryption.encrypt(user.FirstName.trim());
     }
-    if (user.$dirty.lastName) {
-      user.lastName = Encryption.encrypt(user.lastName.trim());
+    if (user.$dirty.LastName) {
+      user.LastName = Encryption.encrypt(user.LastName.trim());
     }
-    if (user.$dirty.mobile) {
-      user.mobile = Encryption.encrypt(user.mobile.trim());
+    if (user.$dirty.Mobile) {
+      user.Mobile = Encryption.encrypt(user.Mobile.trim());
     }
   }
   @afterFetch()
   public static async decryptValues(users: User[]) {
     users.forEach((user: User) => {
-      user.firstName = Encryption.decrypt(user.firstName)!;
-      user.lastName = Encryption.decrypt(user.lastName)!;
-      user.mobile = Encryption.decrypt(user.mobile)!;
+      user.FirstName = Encryption.decrypt(user.FirstName)!;
+      user.LastName = Encryption.decrypt(user.LastName)!;
+      user.Mobile = Encryption.decrypt(user.Mobile)!;
     });
   }
 }

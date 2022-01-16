@@ -1,19 +1,38 @@
+import {
+  BaseModel,
+  column,
+  beforeSave,
+  beforeCreate,
+  afterFind,
+} from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
-import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import Hash from "@ioc:Adonis/Core/Hash";
+import { v4 as uuid } from "uuid";
 
 export default class PendingSignup extends BaseModel {
+  public static selfAssignPrimaryKey = true;
+
   @column({ isPrimary: true })
-  public pendingSignupId: string;
+  public PendingSignupId: string;
 
   @column()
-  public email: string;
+  public Email: string;
 
   @column()
-  public password: string;
+  public Password: string;
 
   @column()
-  public code: string;
+  public Code: string;
 
-  @column()
+  @column.dateTime({ autoCreate: true })
   public dateCreated: DateTime;
+
+  @beforeCreate()
+  public static async generateId(pendingSignUp: PendingSignup) {
+    pendingSignUp.PendingSignupId = uuid();
+  }
+  @beforeSave()
+  public static async hashPassword(pendingSignUp: PendingSignup) {
+    pendingSignUp.Password = await Hash.make(pendingSignUp.Password);
+  }
 }
