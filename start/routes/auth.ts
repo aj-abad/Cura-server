@@ -1,5 +1,4 @@
 import Route from "@ioc:Adonis/Core/Route";
-import Database from "@ioc:Adonis/Lucid/Database";
 import Env from "@ioc:Adonis/Core/Env";
 import { DateTime } from "luxon";
 import { errorMessage } from "App/Modules/errormessages";
@@ -86,5 +85,48 @@ Route.group(() => {
       .save();
     sendSignupVerificationMail(email, code);
     return null;
+  });
+
+  Route.post("verify", async ({ request, response }) => {
+    const code = request.input("code");
+    const email = request.input("email")?.toLowerCase().trim();
+
+    const toVerify = await PendingSignup.query()
+      .where("Email", email)
+      .andWhere("Code", code)
+      .first();
+
+    //if no matching record found
+    if (!toVerify)
+      return response.badRequest({
+        errorMessage: errorMessage.auth.codeInvalid,
+      });
+
+    //if code is expired
+    if (
+      toVerify.DateCreated.toMillis() <
+      DateTime.utc()
+        .minus({ minutes: Env.get("VERIFICATION_CODE_EXPIRY_MINUTES") })
+        .toMillis()
+    ) {
+      return response.badRequest({
+        errorMessage: errorMessage.auth.codeExpired,
+      });
+    }
+
+    const { Email, Password } = toVerify;
+
+    //create user
+    const newUser = new User();
+    newUser.shouldHashPassword = false;
+    newUser.merge({
+      Email,
+      Password,
+      UserStatusId: 1,
+      UserTypeId: 1,
+    });
+    await newUser.save();
+    //TODO generate token for new user
+    return response.created();
   });
 }).prefix("auth");
