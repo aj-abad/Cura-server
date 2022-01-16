@@ -13,6 +13,9 @@ import { v4 as uuid } from "uuid";
 
 export default class User extends BaseModel {
   public static selfAssignPrimaryKey = true;
+
+  public shouldHashPassword = true;
+
   @column({
     isPrimary: true,
   })
@@ -60,7 +63,7 @@ export default class User extends BaseModel {
 
   @beforeSave()
   public static async hashPassword(user: User) {
-    if (user.$dirty.password) {
+    if (user.$dirty.password && user.shouldHashPassword) {
       user.Password = await Hash.make(user.Password);
     }
   }
