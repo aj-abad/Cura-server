@@ -3,7 +3,7 @@ import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import { string } from "@ioc:Adonis/Core/Helpers";
 import Database from "@ioc:Adonis/Lucid/Database";
 
-class CamelCaseNamingStrategy extends SnakeCaseNamingStrategy {
+class PascalCaseNamingStrategy extends SnakeCaseNamingStrategy {
   public tableName(model: typeof BaseModel) {
     return string.pluralize(string.pascalCase(model.name));
   }
@@ -65,5 +65,5 @@ class CamelCaseNamingStrategy extends SnakeCaseNamingStrategy {
   }
 }
 
-Database.SimplePaginator.namingStrategy = new CamelCaseNamingStrategy();
-BaseModel.namingStrategy = new CamelCaseNamingStrategy();
+Database.SimplePaginator.namingStrategy = new PascalCaseNamingStrategy();
+BaseModel.namingStrategy = new PascalCaseNamingStrategy();
