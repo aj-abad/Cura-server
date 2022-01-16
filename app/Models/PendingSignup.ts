@@ -25,7 +25,7 @@ export default class PendingSignup extends BaseModel {
   public Code: string;
 
   @column.dateTime({ autoCreate: true })
-  public dateCreated: DateTime;
+  public DateCreated: DateTime;
 
   @beforeCreate()
   public static async generateId(pendingSignUp: PendingSignup) {
