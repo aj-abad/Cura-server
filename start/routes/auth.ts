@@ -1,37 +1,44 @@
 import Route from "@ioc:Adonis/Core/Route";
 import Database from "@ioc:Adonis/Lucid/Database";
-import { errorMessage } from "App/Modules/errormessages";
-import PendingSignup from "App/Models/PendingSignup";
-import { v4 as uuid } from "uuid";
-import { generateCode } from "App/Modules/stringutils";
-import { DateTime } from "luxon";
 import Env from "@ioc:Adonis/Core/Env";
+import { DateTime } from "luxon";
+import { errorMessage } from "App/Modules/errormessages";
+import { generateCode } from "App/Modules/stringutils";
 import { sendSignupVerificationMail } from "App/Modules/emailutils";
-import User from "App/Models/User";
-import Encryption from "@ioc:Adonis/Core/Encryption";
 import { validateEmail } from "App/Modules/validationutils";
+import { UserType } from "App/Enums/UserType";
+import PendingSignup from "App/Models/PendingSignup";
+import User from "App/Models/User";
 
 Route.group(() => {
-  // console.log(user);
+  Route.post("checkemail", async ({ request, response }) => {
+    const email = request.input("email")?.toLowerCase().trim();
+    const userType = parseInt(request.input("userType"));
+    if (!Object.values(UserType).includes(userType)) {
+      return response.badRequest();
+    }
 
-  Route.post("checkemail", async (ctx) => {
-    const email = ctx.request.input("email")?.toLowerCase().trim();
     if (!validateEmail(email))
-      return ctx.response.badRequest({
+      return response.badRequest({
         errorMessage: errorMessage.auth.invalidEmail,
       });
 
-    const emailExists = !!(await Database.from("Users")
-      .where("email", Encryption.encrypt(email))
-      .andWhere("UserStatusId", ">", 0)
-      .select(1)
-      .first());
+    const matchedUser = await User.findBy("Email", email);
+    let emailExists = !!matchedUser;
+    if (!matchedUser) {
+      return { emailExists };
+    }
 
+    if (matchedUser.UserTypeId !== userType) {
+      return response.badRequest({
+        errorMessage: errorMessage.auth.userTypeMismatch,
+      });
+    }
     return { emailExists };
   });
 
   Route.post("signup", async ({ request, response }) => {
-    const email = request.input("email");
+    const email = request.input("email")?.toLowerCase().trim();
     const password = request.input("password");
     if (!validateEmail(email))
       return response.badRequest({
@@ -49,77 +56,35 @@ Route.group(() => {
 
     const codeSentSince = DateTime.utc()
       .minus({ minutes: Env.get("VERIFICATION_CODE_COOLDOWN_MINUTES") })
-      .toString();
-    const recentlySignedUp = await PendingSignup.query()
-      .where("email", email)
-      .andWhere("dateCreated", ">=", codeSentSince)
+      .toMillis();
+
+    const existingPendingSignup = await PendingSignup.query()
+      .where("Email", email)
       .first();
 
-    if (recentlySignedUp) {
+    if (
+      existingPendingSignup &&
+      existingPendingSignup.DateCreated.toMillis() >= codeSentSince
+    ) {
+      console.log(existingPendingSignup);
+      //only update password if code is still valid
+      existingPendingSignup.Password = password;
+      await existingPendingSignup.save();
       return response.ok(null);
     }
-
-    const newSignup = await new PendingSignup()
-      .fill({
-        pendingSignupId: uuid(),
-        email,
-        password,
-        code: generateCode(5),
-        dateCreated: DateTime.utc(),
+    //otherwise delete old sign up records if any and create new one
+    const oldRecords = await PendingSignup.query().where("Email", email);
+    oldRecords.forEach(async (record) => await record.delete());
+    //then send an email
+    const code = generateCode(5);
+    await new PendingSignup()
+      .merge({
+        Email: email,
+        Password: password,
+        Code: code,
       })
       .save();
-    sendSignupVerificationMail(email, newSignup.code);
-
-    return response.created();
-  });
-
-  Route.post("verifyemail", async ({ request, response }) => {
-    const email = request.input("email")?.toLowerCase().trim();
-    const code = request.input("code");
-    const validator = require("email-validator");
-    if (!validator.validate(email))
-      return response.badRequest({
-        errorMessage: errorMessage.auth.invalidEmail,
-      });
-
-    const userToVerify = await Database.from("PendingSignUps")
-      .where("code", code)
-      .andWhere("email", email)
-      .select("DateCreated, Email, Password")
-      .first();
-
-    if (!userToVerify) {
-      return response.badRequest({
-        errorMessage: errorMessage.auth.codeInvalid,
-      });
-    }
-
-    const { DateCreated } = userToVerify;
-    const codeExpiredTime = DateTime.utc().minus({
-      minutes: Env.get("VERIFICATION_CODE_EXPIRY_MINUTES"),
-    });
-    if (DateCreated.toMillis() < codeExpiredTime.toMillis()) {
-      return response.badRequest({
-        errorMessage: errorMessage.auth.codeExpired,
-      });
-    }
-
-    const newUser = await new User()
-      .fill({
-        userId: uuid(),
-        userStatusId: 1,
-        userTypeId: 1,
-        email: userToVerify.Email,
-        password: userToVerify.Password,
-      })
-      .save();
-    userToVerify.delete();
-    return response.created();
-  });
-
-  Route.post("auth/signin", async ({ request, response }) => {
-    const email = request.input("email")?.toLowerCase().trim();
-    const password = request.input("password");
-    //TODO create sign in logic
+    sendSignupVerificationMail(email, code);
+    return null;
   });
 }).prefix("auth");
