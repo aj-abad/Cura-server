@@ -8,6 +8,8 @@ import { validateEmail } from "App/Modules/validationutils";
 import { UserType } from "App/Enums/UserType";
 import PendingSignup from "App/Models/PendingSignup";
 import User from "App/Models/User";
+import Database from "@ioc:Adonis/Lucid/Database";
+import Hash from "@ioc:Adonis/Core/Hash";
 
 Route.group(() => {
   Route.post("checkemail", async ({ request, response }) => {
@@ -23,7 +25,7 @@ Route.group(() => {
       });
 
     const matchedUser = await User.findBy("Email", email);
-    let emailExists = !!matchedUser;
+    const emailExists = !!matchedUser;
     if (!matchedUser) {
       return { emailExists };
     }
@@ -53,6 +55,10 @@ Route.group(() => {
         errorMessage: errorMessage.auth.passwordTooLong,
       });
 
+    const existingUser = await User.findBy("Email", email);
+    if (!!existingUser)
+      return response.conflict({ errorMessage: errorMessage.auth.emailInUse });
+
     const codeSentSince = DateTime.utc()
       .minus({ minutes: Env.get("VERIFICATION_CODE_COOLDOWN_MINUTES") })
       .toMillis();
@@ -71,9 +77,8 @@ Route.group(() => {
       await existingPendingSignup.save();
       return response.ok(null);
     }
-    //otherwise delete old sign up records if any and create new one
-    const oldRecords = await PendingSignup.query().where("Email", email);
-    oldRecords.forEach(async (record) => await record.delete());
+    //otherwise delete old sign up records if any and create new
+    await Database.from("PendingSignups").where("email", email).delete();
     //then send an email
     const code = generateCode(5);
     await new PendingSignup()
@@ -84,13 +89,12 @@ Route.group(() => {
       })
       .save();
     sendSignupVerificationMail(email, code);
-    return null;
   });
 
-  Route.post("verify", async ({ request, response }) => {
+  Route.post("verify", async ({ auth, request, response }) => {
     const code = request.input("code");
     const email = request.input("email")?.toLowerCase().trim();
-
+    //Find user to verify
     const toVerify = await PendingSignup.query()
       .where("Email", email)
       .andWhere("Code", code)
@@ -116,17 +120,44 @@ Route.group(() => {
 
     const { Email, Password } = toVerify;
 
-    //create user
+    //create user and delete pending signup record
+    await Database.from("PendingSignups").where("email", Email).delete();
     const newUser = new User();
     newUser.shouldHashPassword = false;
     newUser.merge({
       Email,
       Password,
-      UserStatusId: 1,
+      UserStatusId: 2,
       UserTypeId: 1,
     });
+
     await newUser.save();
-    //TODO generate token for new user
-    return response.created();
+    return response.created(await auth.use("api").generate(newUser));
+  });
+
+  Route.post("signin", async ({ auth, request, response }) => {
+    const email = request.input("email")?.toLowerCase().trim();
+    const password = request.input("password");
+    //Find matching user
+    const user = await User.findBy("Email", email);
+    if (!user)
+      return response.unauthorized({
+        errorMessage: errorMessage.auth.invalidCredentials,
+      });
+    //Get stuff from user
+    const { UserStatusId: userStatus } = user;
+    const isPasswordValid = await Hash.verify(user.Password, password);
+    if (!isPasswordValid) {
+      return response.unauthorized({
+        errorMessage: errorMessage.auth.invalidCredentials,
+      });
+    }
+
+    // verified
+    const token = await auth.use("api").generate(user);
+    return {
+      userStatus,
+      token,
+    };
   });
 }).prefix("auth");
