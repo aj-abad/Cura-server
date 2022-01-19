@@ -4,6 +4,8 @@ import { validateEmail } from "App/modules/validationutils";
 import { errorMessage } from "App/modules/errormessages";
 import PendingSignup from "App/Models/PendingSignup";
 import { DateTime } from "luxon";
+import { generateCode } from "App/modules/stringutils";
+import { EmailUtils } from "App/modules/emailutils";
 
 Route.group(() => {
   Route.post("resend", async ({ request, response }) => {
@@ -27,9 +29,13 @@ Route.group(() => {
         errorMessage: `Please try again in ${timeRemaining} minutes.`,
       });
     }
-
+    pendingSignup.Code = generateCode(5);
     pendingSignup.DateCreated = DateTime.now();
     await pendingSignup.save();
+    EmailUtils.sendSignupVerificationMail(
+      pendingSignup.Email,
+      pendingSignup.Code
+    );
     return response.ok(null);
   });
 }).prefix("email");

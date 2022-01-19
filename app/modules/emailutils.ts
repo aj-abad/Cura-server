@@ -7,51 +7,28 @@ const from = {
   name: Env.get("SENDGRID_SENDER_NAME"),
 };
 
-export function sendEmail(
-  recipient: string,
-  subject: string,
-  message: string
-): boolean {
-  let isSent = false;
-  const msg = {
-    to: recipient,
-    from,
-    subject,
-    text: message,
-    html: message,
-  };
-  sgMail
-    .send(msg)
-    .then(() => {
-      isSent = true;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
-  return isSent;
-}
-
-export function sendSignupVerificationMail(
-  recipient: string,
-  code: string
-): boolean {
-  let isSent = false;
-  const msg = {
-    to: recipient,
-    from,
-    templateId: "d-9e13297c99504d71ae41dea203a38c88",
-    dynamicTemplateData: {
-      code,
-    },
-  };
-  sgMail
-    .send(msg)
-    .then(() => {
-      isSent = true;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  return isSent;
+export class EmailUtils {
+  public static sendSignupVerificationMail(
+    recipient: string,
+    code: string
+  ): boolean {
+    let isSent: boolean = false;
+    const msg = {
+      to: recipient,
+      from,
+      templateId: "d-9e13297c99504d71ae41dea203a38c88",
+      dynamicTemplateData: {
+        code,
+      },
+    };
+    sgMail
+      .send(msg)
+      .then(() => {
+        isSent = true;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return isSent;
+  }
 }

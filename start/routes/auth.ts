@@ -3,7 +3,7 @@ import Env from "@ioc:Adonis/Core/Env";
 import { DateTime } from "luxon";
 import { errorMessage } from "App/Modules/errormessages";
 import { generateCode } from "App/Modules/stringutils";
-import { sendSignupVerificationMail } from "App/Modules/emailutils";
+import { EmailUtils } from "App/Modules/emailutils";
 import { validateEmail } from "App/Modules/validationutils";
 import { UserType } from "App/Enums/UserType";
 import PendingSignup from "App/Models/PendingSignup";
@@ -88,7 +88,7 @@ Route.group(() => {
         Code: code,
       })
       .save();
-    sendSignupVerificationMail(email, code);
+    EmailUtils.sendSignupVerificationMail(email, code);
   });
 
   Route.post("verify", async ({ auth, request, response }) => {
@@ -102,7 +102,7 @@ Route.group(() => {
 
     //if no matching record found
     if (!toVerify)
-      return response.badRequest({
+      return response.unauthorized({
         errorMessage: errorMessage.auth.codeInvalid,
       });
 
@@ -138,12 +138,14 @@ Route.group(() => {
   Route.post("signin", async ({ auth, request, response }) => {
     const email = request.input("email")?.toLowerCase().trim();
     const password = request.input("password");
+
     //Find matching user
     const user = await User.findBy("Email", email);
     if (!user)
       return response.unauthorized({
         errorMessage: errorMessage.auth.invalidCredentials,
       });
+
     //Get stuff from user
     const { UserStatusId: userStatus } = user;
     const isPasswordValid = await Hash.verify(user.Password, password);
@@ -155,6 +157,7 @@ Route.group(() => {
 
     // verified
     const token = await auth.use("api").generate(user);
+
     return {
       userStatus,
       token,
