@@ -5,4 +5,6 @@ Route.group(() => {
   Route.post("signup", "AuthController.signUp");
   Route.post("verify", "AuthController.verify");
   Route.post("signin", "AuthController.signIn");
-}).prefix("auth");
+})
+  .middleware(["validateAndSanitizeEmail"])
+  .prefix("auth");

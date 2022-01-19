@@ -13,14 +13,11 @@ import UserStatus from "App/Enums/UserStatus";
 
 export default class AuthController {
   public async checkEmail({ request, response }) {
-    const email = request.input("email")?.toLowerCase().trim();
+    const email = request.input("email");
     const userType = parseInt(request.input("userType"));
     if (!Object.values(UserType).includes(userType)) {
       return response.badRequest();
     }
-
-    if (!Validation.validateEmail(email))
-      return response.badRequest(ErrorMessage.Validation.InvalidEmail);
 
     const matchedUser = await User.findBy("Email", email);
     const emailExists = !!matchedUser;
@@ -35,10 +32,9 @@ export default class AuthController {
   }
 
   public async signUp({ request, response }) {
-    const email = request.input("email")?.toLowerCase().trim();
+    const email = request.input("email");
     const password = request.input("password");
-    if (!Validation.validateEmail(email))
-      return response.badRequest(ErrorMessage.Validation.InvalidEmail);
+
     if (password?.length < 6)
       return response.badRequest(ErrorMessage.Validation.PasswordTooShort);
     if (password?.length > 128)
