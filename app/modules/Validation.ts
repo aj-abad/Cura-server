@@ -10,7 +10,7 @@ export default class Validation {
     return uuidPattern.test(uuid);
   }
 
-  public static validateMobileNumber(mobile: string): boolean {
+  public static validateMobile(mobile: string): boolean {
     //valid Philippine mobile number prefixes
     const validPrefixes = [
       "817",
@@ -84,6 +84,7 @@ export default class Validation {
     return true;
   }
 
+  //intentionally lax because people got weird names
   public static validateName(name: string): boolean {
     if (name.trim().length === 0) return false;
     const namePattern = /^[\p{L}'][ \p{L}'-]*[\p{L}]$/;
