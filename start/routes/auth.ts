@@ -1,11 +1,12 @@
 import Route from "@ioc:Adonis/Core/Route";
 import Env from "@ioc:Adonis/Core/Env";
 import { DateTime } from "luxon";
-import ErrorMessage from "App/modules/ErrorMessage";
+import ErrorMessage from "App/Modules/ErrorMessage";
 import { generateCode } from "App/Modules/stringutils";
 import { EmailUtils } from "App/Modules/emailutils";
 import { validateEmail } from "App/Modules/validationutils";
-import { UserType } from "App/Enums/UserType";
+import UserType from "App/Enums/UserType";
+import UserStatus from "App/Enums/UserStatus";
 import PendingSignup from "App/Models/Redis/PendingSignup";
 import User from "App/Models/User";
 import Hash from "@ioc:Adonis/Core/Hash";
@@ -130,5 +131,23 @@ Route.group(() => {
     const matchedSignup = await Redis.get(`signup:${email}`);
     if (!matchedSignup)
       return response.unauthorized(ErrorMessage.Auth.CodeInvalid);
+    const matchedSignupUser = <PendingSignup>JSON.parse(matchedSignup);
+    if (matchedSignupUser.Code !== code)
+      return response.unauthorized(ErrorMessage.Auth.CodeInvalid);
+    //Delete pending signup record in Redis and create user in DB
+    Redis.del(`signup:${email}`);
+
+    const { Email, Password } = matchedSignupUser;
+    const newUser = await new User()
+      .merge({
+        shouldHashPassword: false,
+        Email,
+        UserStatusId: UserStatus.PendingSetup,
+        UserTypeId: UserType.Customer,
+        Password,
+      })
+      .save();
+    const token = await auth.use("api").generate(newUser);
+    return response.created({ token });
   });
 }).prefix("auth");
