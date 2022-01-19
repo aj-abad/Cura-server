@@ -1,5 +1,5 @@
 export default class PendingSignup {
-  public constructor(init?: Partial<Person>) {
+  public constructor(init?: Partial<PendingSignup>) {
     Object.assign(this, init);
   }
   public Email: string;
