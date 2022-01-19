@@ -19,7 +19,7 @@ export default class AuthController {
       return response.badRequest();
     }
 
-    if (Validation.validateEmail(email))
+    if (!Validation.validateEmail(email))
       return response.badRequest(ErrorMessage.Auth.InvalidEmail);
 
     const matchedUser = await User.findBy("Email", email);
