@@ -1,6 +1,6 @@
 export enum UserType {
-  customer = 1,
-  storeowner = 2,
-  specialist = 3,
-  soleProprietor = 4,
+  Customer = 1,
+  Storeowner = 2,
+  Specialist = 3,
+  SoleProprietor = 4,
 }
