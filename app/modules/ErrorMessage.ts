@@ -5,6 +5,7 @@ export default class ErrorMessage {
 
   public static Validation = {
     InvalidEmail: this.err("Please enter a valid email address."),
+    InvalidId: this.err("Invalid ID."),
     PasswordTooShort: this.err("Password must be at least 6 characters."),
     PasswordTooLong: this.err("Password is too long."),
   };
