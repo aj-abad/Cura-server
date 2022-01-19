@@ -26,3 +26,4 @@ Route.get("*", async ({ view }) => {
 
 import "./routes/auth";
 import "./routes/email";
+import "./routes/account";
