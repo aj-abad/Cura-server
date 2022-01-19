@@ -71,13 +71,13 @@ export default class User extends BaseModel {
   @beforeSave()
   public static encryptValues(user: User) {
     if (user.$dirty.FirstName) {
-      user.FirstName = Encryption.encrypt(user.FirstName.trim());
+      user.FirstName = Encryption.encrypt(user.FirstName);
     }
     if (user.$dirty.LastName) {
-      user.LastName = Encryption.encrypt(user.LastName.trim());
+      user.LastName = Encryption.encrypt(user.LastName);
     }
     if (user.$dirty.Mobile) {
-      user.Mobile = Encryption.encrypt(user.Mobile.trim());
+      user.Mobile = Encryption.encrypt(user.Mobile);
     }
   }
   @afterFetch()
