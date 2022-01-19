@@ -3,11 +3,14 @@ export default class ErrorMessage {
     return { errorMessage };
   }
 
-  public static Auth = {
+  public static Validation = {
     InvalidEmail: this.err("Please enter a valid email address."),
-    InvalidCredentials: this.err("Invalid credentials."),
     PasswordTooShort: this.err("Password must be at least 6 characters."),
     PasswordTooLong: this.err("Password is too long."),
+  };
+
+  public static Auth = {
+    InvalidCredentials: this.err("Invalid credentials."),
     UserTypeMismatch: this.err("This account is for a different Cura app."),
     EmailInUse: this.err("This email address is already in use."),
     CodeInvalid: this.err("This code is expired or invalid."),

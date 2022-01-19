@@ -20,7 +20,7 @@ export default class AuthController {
     }
 
     if (!Validation.validateEmail(email))
-      return response.badRequest(ErrorMessage.Auth.InvalidEmail);
+      return response.badRequest(ErrorMessage.Validation.InvalidEmail);
 
     const matchedUser = await User.findBy("Email", email);
     const emailExists = !!matchedUser;
@@ -29,7 +29,7 @@ export default class AuthController {
     }
 
     if (matchedUser.UserTypeId !== userType) {
-      return response.badRequest(ErrorMessage.Auth.PasswordTooShort);
+      return response.badRequest(ErrorMessage.Validation.PasswordTooShort);
     }
     return { emailExists };
   }
@@ -38,11 +38,11 @@ export default class AuthController {
     const email = request.input("email")?.toLowerCase().trim();
     const password = request.input("password");
     if (!Validation.validateEmail(email))
-      return response.badRequest(ErrorMessage.Auth.InvalidEmail);
+      return response.badRequest(ErrorMessage.Validation.InvalidEmail);
     if (password?.length < 6)
-      return response.badRequest(ErrorMessage.Auth.PasswordTooShort);
+      return response.badRequest(ErrorMessage.Validation.PasswordTooShort);
     if (password?.length > 128)
-      return response.badRequest(ErrorMessage.Auth.PasswordTooLong);
+      return response.badRequest(ErrorMessage.Validation.PasswordTooLong);
 
     const codeLength = Env.get("VERIFICATION_CODE_LENGTH") as number;
     const codeExpiry =
