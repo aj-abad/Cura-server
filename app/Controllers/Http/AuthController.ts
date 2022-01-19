@@ -1,7 +1,6 @@
 import UserType from "App/Enums/UserType";
 import User from "App/Models/User";
 import ErrorMessage from "App/Modules/ErrorMessage";
-import Validation from "App/Modules/Validation";
 import Env from "@ioc:Adonis/Core/Env";
 import { DateTime } from "luxon";
 import Redis from "@ioc:Adonis/Addons/Redis";
