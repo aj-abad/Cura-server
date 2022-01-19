@@ -12,4 +12,10 @@ export default class ErrorMessage {
     EmailInUse: this.err("This email address is already in use."),
     CodeInvalid: this.err("This code is expired or invalid."),
   };
+
+  public static Email = {
+    ResendCode(seconds: number): object {
+      return this.err(`Please wait ${seconds} seconds before resending.`);
+    },
+  };
 }
