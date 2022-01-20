@@ -21,7 +21,7 @@ export default class User extends BaseModel {
   })
   public UserId: string;
 
-  @column()
+  @column({ serializeAs: "userStatus" })
   public UserStatusId: number;
 
   @column()
