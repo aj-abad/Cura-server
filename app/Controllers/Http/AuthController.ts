@@ -7,7 +7,7 @@ import Redis from "@ioc:Adonis/Addons/Redis";
 import PendingSignup from "App/Models/Redis/PendingSignup";
 import Hash from "@ioc:Adonis/Core/Hash";
 import { EmailUtils } from "App/Modules/emailutils";
-import { generateCode } from "App/Modules/stringutils";
+import StringHelpers from "App/Modules/StringHelpers";
 import UserStatus from "App/Enums/UserStatus";
 
 export default class AuthController {
@@ -53,12 +53,11 @@ export default class AuthController {
     const signupKey = `signup:${email}`;
     const existingPendingSignup = await Redis.get(signupKey);
     if (!existingPendingSignup) {
-      console.log("no user found");
       //Create pending sign up record on Redis, make it valid for code_expiry minutes
       const newUser = new PendingSignup({
         Email: email,
         Password: passwordHash,
-        Code: generateCode(codeLength),
+        Code: StringHelpers.generateCode(codeLength),
         DateCreated: DateTime.utc().toMillis(),
       });
       Redis.set(signupKey, JSON.stringify(newUser));
@@ -68,7 +67,6 @@ export default class AuthController {
     }
 
     //Update user pending signup record if exists
-    console.log("user found");
     const existingSignup: PendingSignup = <PendingSignup>(
       JSON.parse(existingPendingSignup)
     );
@@ -91,8 +89,7 @@ export default class AuthController {
     }
 
     //otherwise create new code and refresh expiry
-    console.log("code is old");
-    existingSignup.Code = generateCode(codeLength);
+    existingSignup.Code = StringHelpers.generateCode(codeLength);
     existingSignup.DateCreated = DateTime.utc().toMillis();
     Redis.set(signupKey, JSON.stringify(existingSignup));
     Redis.expire(signupKey, codeExpiry);
@@ -113,7 +110,6 @@ export default class AuthController {
 
     const matchedSignupUser = <PendingSignup>JSON.parse(matchedSignup);
     if (matchedSignupUser.Code !== code) {
-      console.log("user found but code invalid");
       return response.unauthorized(ErrorMessage.Auth.CodeInvalid);
     }
 
