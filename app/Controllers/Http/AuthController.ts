@@ -138,7 +138,6 @@ export default class AuthController {
       return response.unauthorized(ErrorMessage.Auth.InvalidCredentials);
 
     //Get stuff from user
-    const { UserStatusId: userStatus } = user;
     const isPasswordValid = await Hash.verify(user.Password, password);
     if (!isPasswordValid) {
       return response.unauthorized(ErrorMessage.Auth.InvalidCredentials);
@@ -148,7 +147,7 @@ export default class AuthController {
     const token = await auth.use("api").generate(user);
 
     return {
-      userStatus,
+      user,
       token,
     };
   }
