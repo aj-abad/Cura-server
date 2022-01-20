@@ -43,12 +43,17 @@ export default class User extends BaseModel {
   public Mobile: string;
 
   @column.dateTime({
+    serializeAs: null,
     autoCreate: true,
     serialize: (date) => date.toString(),
   })
   public dateRegistered: DateTime;
 
-  @column.dateTime({ autoUpdate: true, serialize: (date) => date.toString() })
+  @column.dateTime({
+    serializeAs: null,
+    autoUpdate: true,
+    serialize: (date) => date.toString(),
+  })
   public dateUpdated: DateTime;
 
   @beforeCreate()
