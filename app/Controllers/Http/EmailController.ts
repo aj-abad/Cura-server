@@ -3,12 +3,12 @@ import Validation from "App/Modules/Validation";
 import Env from "@ioc:Adonis/Core/Env";
 import { DateTime } from "luxon";
 import ErrorMessage from "App/Modules/ErrorMessage";
-import { generateCode } from "App/Modules/stringutils";
-import { EmailUtils } from "App/Modules/emailutils";
+import StringHelpers from "App/Modules/StringHelpers";
+import EmailUtils from "App/Modules/EmailUtils";
 import PendingSignup from "App/Models/Redis/PendingSignup";
 
 export default class EmailsController {
-  public async resend({ request, response }) {
+  public async resendVerificationMail({ request, response }) {
     const email = request.input("email")?.toLowerCase().trim();
     if (!Validation.validateEmail(email)) return response.badRequest();
     //TODO test this
@@ -37,7 +37,7 @@ export default class EmailsController {
     }
 
     //update redis record
-    signupRecord.Code = generateCode(
+    signupRecord.Code = StringHelpers.generateCode(
       Env.get("VERIFICATION_CODE_LENGTH") as number
     );
     signupRecord.DateCreated = DateTime.utc().toMillis();

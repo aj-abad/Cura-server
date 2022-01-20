@@ -6,7 +6,7 @@ import { DateTime } from "luxon";
 import Redis from "@ioc:Adonis/Addons/Redis";
 import PendingSignup from "App/Models/Redis/PendingSignup";
 import Hash from "@ioc:Adonis/Core/Hash";
-import { EmailUtils } from "App/Modules/emailutils";
+import EmailUtils from "App/Modules/EmailUtils";
 import StringHelpers from "App/Modules/StringHelpers";
 import UserStatus from "App/Enums/UserStatus";
 
