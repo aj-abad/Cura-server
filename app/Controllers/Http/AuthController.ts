@@ -60,8 +60,7 @@ export default class AuthController {
         Code: StringHelpers.generateCode(codeLength),
         DateCreated: DateTime.utc().toMillis(),
       });
-      Redis.set(signupKey, JSON.stringify(newUser));
-      Redis.expire(signupKey, codeExpiry);
+      await Redis.set(signupKey, JSON.stringify(newUser), "EX", codeExpiry);
       EmailUtils.sendSignupVerificationMail(email, newUser.Code);
       return response.created();
     }
@@ -77,8 +76,12 @@ export default class AuthController {
       DateTime.utc().toMillis() - existingSignup.DateCreated <
       codeCooldown * 60 * 1000;
     if (isSentWithinCooldown) {
-      Redis.set(signupKey, JSON.stringify(existingSignup));
-      Redis.expire(signupKey, codeExpiry);
+      await Redis.set(
+        signupKey,
+        JSON.stringify(existingSignup),
+        "EX",
+        codeExpiry
+      );
       const secondsBeforeResend = Math.round(
         codeCooldown * 60 -
           (DateTime.utc().toMillis() - existingSignup.DateCreated) / 1000
@@ -91,8 +94,12 @@ export default class AuthController {
     //otherwise create new code and refresh expiry
     existingSignup.Code = StringHelpers.generateCode(codeLength);
     existingSignup.DateCreated = DateTime.utc().toMillis();
-    Redis.set(signupKey, JSON.stringify(existingSignup));
-    Redis.expire(signupKey, codeExpiry);
+    await Redis.set(
+      signupKey,
+      JSON.stringify(existingSignup),
+      "EX",
+      codeExpiry
+    );
     //then send verification email
     EmailUtils.sendSignupVerificationMail(email, existingSignup.Code);
     return response.created();
