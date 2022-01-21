@@ -42,6 +42,9 @@ export default class User extends BaseModel {
   @column()
   public Mobile: string;
 
+  @column()
+  public ProfileImage: string;
+
   @column.dateTime({
     serializeAs: null,
     autoCreate: true,
@@ -84,6 +87,9 @@ export default class User extends BaseModel {
     if (user.$dirty.Mobile) {
       user.Mobile = Encryption.encrypt(user.Mobile);
     }
+    if (user.$dirty.ProfileImage) {
+      user.ProfileImage = Encryption.encrypt(user.ProfileImage);
+    }
   }
   @afterFetch()
   public static async decryptValues(users: User[]) {
@@ -91,6 +97,7 @@ export default class User extends BaseModel {
       user.FirstName = Encryption.decrypt(user.FirstName)!;
       user.LastName = Encryption.decrypt(user.LastName)!;
       user.Mobile = Encryption.decrypt(user.Mobile)!;
+      user.ProfileImage = Encryption.decrypt(user.ProfileImage)!;
     });
   }
 }
