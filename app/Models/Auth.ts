@@ -1,4 +1,4 @@
-import { column, BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import { column, BaseModel, computed } from "@ioc:Adonis/Lucid/Orm";
 
 export default class Auth extends BaseModel {
   public static table = "Users";
@@ -8,4 +8,10 @@ export default class Auth extends BaseModel {
 
   @column()
   public UserTypeId: number;
+
+  @column()
+  public UserStatusId: number;
+
+  @column()
+  public Password: string;
 }
