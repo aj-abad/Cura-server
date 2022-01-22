@@ -151,11 +151,11 @@ export default class AuthController {
     }
 
     // verified
-    const token = await auth.use("api").generate(user);
+    const { token } = await auth.use("api").generate(user);
 
     return {
       user,
-      token,
+      token: `Bearer ${token}`,
     };
   }
 }
