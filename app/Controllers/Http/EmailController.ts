@@ -39,9 +39,10 @@ export default class EmailsController {
       Env.get("VERIFICATION_CODE_LENGTH") as number
     );
     signupRecord.DateCreated = DateTime.utc().toMillis();
-    await Redis.set(signupKey, JSON.stringify(signupRecord));
-    Redis.expire(
+    await Redis.set(
       signupKey,
+      JSON.stringify(signupRecord),
+      "EX",
       (Env.get("VERIFICATION_CODE_EXPIRY_MINUTES") as number) * 60
     );
     //send email
