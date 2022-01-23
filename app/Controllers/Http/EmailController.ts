@@ -11,8 +11,6 @@ export default class EmailsController {
   public async resendVerificationMail({ request, response }) {
     const email = request.input("email")?.toLowerCase().trim();
     if (!Validation.validateEmail(email)) return response.badRequest();
-    //TODO test this
-
     const signupKey = `signup:${email}`;
     const record = await Redis.get(signupKey);
     if (!record) return response.notFound();
