@@ -8,7 +8,8 @@
     "start": "node server.js",
     "lint": "eslint . --ext=.ts",
     "migrate": "node ace migration:run",
-    "rollback": "node ace migration:rollback"
+    "rollback": "node ace migration:rollback",
+    "repl": "node ace repl"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^5.3.9",
