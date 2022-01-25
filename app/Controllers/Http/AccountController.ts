@@ -3,7 +3,7 @@ import User from "App/Models/User";
 
 export default class AccountController {
   public async setup({ auth, request, response }) {
-    const { UserId } = await auth.getUser();
+    const { UserId } = await auth.user!;
     const firstName = request.input("firstName");
     const lastName = request.input("lastName");
     const mobile = request.input("mobile");
@@ -19,7 +19,7 @@ export default class AccountController {
   }
 
   public async resetPassword({ auth, request, response }) {
-    const { UserId } = await auth.getUser();
+    const { UserId } = await auth.user!;
     const newPassword = request.input("password");
 
     //Check user status from database
@@ -33,7 +33,7 @@ export default class AccountController {
   }
 
   public async updatePassword({ auth, request, response }) {
-    const { UserId } = await auth.getUser();
+    const { UserId } = await auth.user!;
     const currentPassword = request.input("currentPassword");
     const newPassword = request.input("newPassword");
 
