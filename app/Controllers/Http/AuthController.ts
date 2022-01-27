@@ -132,7 +132,9 @@ export default class AuthController {
         Password,
       })
       .save();
-    const token = await auth.use("api").generate(newUser);
+    const token = await auth
+      .use("api")
+      .generate(newUser, { expiresIn: "7days" });
     return response.created({ token });
   }
   public async signIn({ auth, request, response }) {
@@ -151,7 +153,9 @@ export default class AuthController {
     }
 
     // verified
-    const { token } = await auth.use("api").generate(user);
+    const { token } = await auth
+      .use("api")
+      .generate(user, { expiresIn: "7days" });
 
     return {
       user,
