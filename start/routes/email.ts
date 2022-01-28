@@ -5,4 +5,8 @@ Route.group(() => {
     "resendverificationmail",
     "EmailController.resendVerificationMail"
   ).middleware(["validateAndSanitizeEmail"]);
+  Route.post(
+    "sendpasswordresetmail",
+    "EmailController.sendPasswordResetMail"
+  ).middleware(["validateAndSanitizeEmail"]);
 }).prefix("email");

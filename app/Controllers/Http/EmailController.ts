@@ -6,6 +6,7 @@ import ErrorMessage from "App/Modules/ErrorMessage";
 import StringHelpers from "App/Modules/StringHelpers";
 import EmailUtils from "App/Modules/EmailUtils";
 import PendingSignup from "App/Models/Redis/PendingSignup";
+import User from "App/Models/User";
 
 export default class EmailsController {
   public async resendVerificationMail({ request, response }) {
@@ -47,5 +48,40 @@ export default class EmailsController {
     );
     //send email
     EmailUtils.sendSignupVerificationMail(email, signupRecord.Code);
+  }
+  public async sendPasswordResetMail({ request, response }) {
+    const email = request.input("email");
+    const user = await User.findBy("email", email);
+    if (!user) return response.badRequest(ErrorMessage.Email.EmailNotFound);
+    const passwordResetValidityMinutes = Env.get(
+      "PASSWORD_RESET_VALIDITY_MINUTES"
+    ) as number;
+
+    //Check if user has a pending password reset request
+    const existingPasswordResetCode = await Redis.get(`passwordReset:${email}`);
+    if (existingPasswordResetCode) {
+      const existingPasswordReset = <PendingSignup>(
+        JSON.parse(existingPasswordResetCode)
+      );
+      if (
+        DateTime.utc().toMillis() - existingPasswordReset.DateCreated <
+        passwordResetValidityMinutes * 60 * 1000
+      )
+        return response.ok(null);
+    }
+
+    const code = StringHelpers.generatePasswordResetPhrase();
+    const passwordReset = new PendingSignup({
+      Email: email,
+      Code: code,
+      DateCreated: DateTime.utc().toMillis(),
+    });
+    await Redis.set(
+      `passwordReset:${email}`,
+      JSON.stringify(passwordReset),
+      "EX",
+      passwordResetValidityMinutes * 60
+    );
+    //TODO send email
   }
 }
