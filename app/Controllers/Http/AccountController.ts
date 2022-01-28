@@ -1,4 +1,6 @@
+import Redis from "@ioc:Adonis/Addons/Redis";
 import UserStatus from "App/Enums/UserStatus";
+import PasswordReset from "App/Models/Redis/PasswordReset";
 import User from "App/Models/User";
 
 export default class AccountController {
@@ -18,18 +20,30 @@ export default class AccountController {
     return response.created();
   }
 
-  public async resetPassword({ auth, request, response }) {
-    const { UserId } = await auth.user!;
+  public async resetPassword({ request, response }) {
+    const email = request.input("email");
+    const code = request.input("code");
     const newPassword = request.input("password");
 
-    //Check user status from database
-    const user = await User.find(UserId);
-    if (!user) {
+    //Check if user exists
+    const user = await User.findBy("email", email);
+    if (!user || user.UserStatusId !== UserStatus.Active) {
       return response.unauthorized();
     }
+
+    //Check if code is valid
+    //TODO add meaningful error message
+    const resetPasswordRecord = await Redis.get(`passwordReset:${email}`);
+    if (!resetPasswordRecord) return response.unauthorized();
+    const resetPasswordRecordObject = <PasswordReset>(
+      JSON.parse(resetPasswordRecord)
+    );
+    if (resetPasswordRecordObject.Code !== code) return response.unauthorized();
+
+    //successful validation
     user.Password = newPassword;
     await user.save();
-    return response.created();
+    return response.ok(null);
   }
 
   public async updatePassword({ auth, request, response }) {

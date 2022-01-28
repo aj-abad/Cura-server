@@ -6,4 +6,8 @@ Route.group(() => {
     "authorizeUserStatus:2",
     "validateAndSanitizeEmail",
   ]);
+
+  Route.post("resetpassword", "AccountController.resetPassword").middleware([
+    "validateAndSanitizeEmail",
+  ]);
 }).prefix("account");
