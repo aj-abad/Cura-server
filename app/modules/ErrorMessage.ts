@@ -23,5 +23,6 @@ export default class ErrorMessage {
     ResendCode(seconds: number): object {
       return this.err(`Please wait ${seconds} seconds before resending.`);
     },
+    EmailNotFound: this.err("No user found with this email."),
   };
 }
