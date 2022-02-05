@@ -3,6 +3,10 @@ export default class ErrorMessage {
     return { errorMessage };
   }
 
+  public static General = {
+    FieldsRequired: this.err("Please fill in all the fields"),
+  }
+
   public static Validation = {
     InvalidEmail: this.err("Please enter a valid email address."),
     InvalidId: this.err("Invalid ID."),
