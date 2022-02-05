@@ -1,24 +1,24 @@
 import ErrorMessage from "App/Modules/ErrorMessage";
 import Validation from "App/Modules/Validation";
+import { DateTime } from "luxon";
 
 export default class ValidateUserDetails {
   public async handle({ request, response }, next: () => Promise<void>) {
-    const firstName: string = request.input("firstName");
-    const lastName = request.input("lastName");
-    const mobile = request.input("mobile");
+   const {firstName, lastName, birthDate} = request.all();
 
     //validate
+    if (!(firstName || lastName) || !birthDate) 
+      return response.badRequest(ErrorMessage.General.FieldsRequired)
     if (!Validation.validateName(`${firstName} ${lastName}`)) {
       return response.badRequest(ErrorMessage.Validation.InvalidName);
     }
-    if (mobile && !Validation.validateMobile(mobile)) {
-      return response.badRequest(ErrorMessage.Validation.InvalidMobile);
-    }
-
+    //check if at least 18 years old
+    const isUnder18 = DateTime.fromISO(birthDate).diffNow().years < 18;
+    if (isUnder18) 
+      return response.badRequest({errorMessage: "You must be at least 18 years old to register"});
     //sanitize
     request.input("firstName", firstName?.trim());
     request.input("lastName", lastName?.trim());
-    request.input("mobile", mobile?.trim());
     await next();
   }
 }
