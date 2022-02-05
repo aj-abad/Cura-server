@@ -6,17 +6,28 @@ import User from "App/Models/User";
 export default class AccountController {
   public async setup({ auth, request, response }) {
     const { UserId } = await auth.user!;
-    const firstName = request.input("firstName");
-    const lastName = request.input("lastName");
-    const mobile = request.input("mobile");
+    const {firstName, lastName, birthDate} = request.all();
 
     //Check user status from database
     const user = await User.find(UserId);
     user!.FirstName = firstName;
     user!.LastName = lastName;
-    if (mobile) user!.Mobile = mobile;
     user!.UserStatusId = UserStatus.Active;
     await user!.save();
+    return response.created();
+  }
+
+  public async setMobile({ auth, request, response }) {
+    const { UserId } = await auth.user!;
+    const mobile = request.input("mobile");
+
+    //Check user status from database
+    const user = await User.find(UserId);
+    if (!user) {
+      return response.unauthorized();
+    }
+    user.Mobile = mobile;
+    await user.save();
     return response.created();
   }
 
