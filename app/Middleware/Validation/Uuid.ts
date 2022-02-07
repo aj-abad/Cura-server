@@ -1,9 +1,9 @@
 import ErrorMessage from "App/Modules/ErrorMessage";
-import Validation from "App/Modules/Validation";
+import {validateUuid} from "cura-validation-utils";
 
 export default class ValidateId {
   public async handle({ request, response }, next: () => Promise<void>) {
-    if (!request.input("id") || !Validation.validateUuid(request.input("id"))) {
+    if (!request.input("id") || !validateUuid(request.input("id"))) {
       return response.badRequest(ErrorMessage.Validation.InvalidId);
     }
     await next();

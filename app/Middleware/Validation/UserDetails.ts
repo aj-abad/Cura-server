@@ -1,6 +1,6 @@
 import ErrorMessage from "App/Modules/ErrorMessage";
-import Validation from "App/Modules/Validation";
 import { DateTime } from "luxon";
+import {validateName} from "cura-validation-utils";
 
 export default class ValidateUserDetails {
   public async handle({ request, response }, next: () => Promise<void>) {
@@ -9,7 +9,7 @@ export default class ValidateUserDetails {
     //validate
     if (!(firstName || lastName) || !birthDate) 
       return response.badRequest(ErrorMessage.General.FieldsRequired)
-    if (!Validation.validateName(`${firstName} ${lastName}`)) {
+    if (!validateName(`${firstName} ${lastName}`)) {
       return response.badRequest(ErrorMessage.Validation.InvalidName);
     }
     //check if at least 18 years old

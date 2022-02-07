@@ -1,5 +1,4 @@
 import Redis from "@ioc:Adonis/Addons/Redis";
-import Validation from "App/Modules/Validation";
 import Env from "@ioc:Adonis/Core/Env";
 import { DateTime } from "luxon";
 import ErrorMessage from "App/Modules/ErrorMessage";
@@ -7,11 +6,12 @@ import StringHelpers from "App/Modules/StringHelpers";
 import EmailUtils from "App/Modules/EmailUtils";
 import PendingSignup from "App/Models/Redis/PendingSignup";
 import User from "App/Models/User";
+import {validateEmail} from "cura-validation-utils";
 
 export default class EmailsController {
   public async resendVerificationMail({ request, response }) {
     const email = request.input("email")?.toLowerCase().trim();
-    if (!Validation.validateEmail(email)) return response.badRequest();
+    if (!validateEmail(email)) return response.badRequest();
     const signupKey = `signup:${email}`;
     const record = await Redis.get(signupKey);
     if (!record) return response.notFound();
