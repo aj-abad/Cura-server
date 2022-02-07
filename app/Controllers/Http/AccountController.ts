@@ -4,6 +4,16 @@ import PasswordReset from "App/Models/Redis/PasswordReset";
 import User from "App/Models/User";
 
 export default class AccountController {
+  public async getUserDetails({auth, request, response}){
+    const { UserId } = await auth.user!;
+    const user = await User.find(UserId);
+    if (!user) {
+      return response.unauthorized();
+    }
+    return response.ok(user);
+  }
+  
+  
   public async setup({ auth, request, response }) {
     const { UserId } = await auth.user!;
     const {firstName, lastName, birthDate} = request.all();
