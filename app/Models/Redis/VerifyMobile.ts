@@ -1,5 +1,8 @@
-export default class VerifyMobile {
+import Stringable  from "./Stringable";
+
+export default class VerifyMobile extends Stringable {
   public constructor(init?: Partial<VerifyMobile>) {
+    super();
     Object.assign(this, init);
   }
   public UserId: string;
