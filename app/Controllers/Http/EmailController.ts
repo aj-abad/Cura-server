@@ -6,7 +6,7 @@ import StringHelpers from "App/Modules/StringHelpers";
 import EmailUtils from "App/Modules/EmailUtils";
 import PendingSignup from "App/Models/Redis/PendingSignup";
 import User from "App/Models/User";
-import {validateEmail} from "cura-validation-utils";
+import { validateEmail } from "cura-validation-utils";
 
 export default class EmailsController {
   public async resendVerificationMail({ request, response }) {
@@ -42,7 +42,7 @@ export default class EmailsController {
     signupRecord.DateCreated = DateTime.utc().toMillis();
     await Redis.set(
       signupKey,
-      JSON.stringify(signupRecord),
+      signupRecord.toString(),
       "EX",
       (Env.get("VERIFICATION_CODE_EXPIRY_MINUTES") as number) * 60
     );
@@ -78,7 +78,7 @@ export default class EmailsController {
     });
     await Redis.set(
       `passwordReset:${email}`,
-      JSON.stringify(passwordReset),
+      passwordReset.toString(),
       "EX",
       passwordResetValidityMinutes * 60
     );
