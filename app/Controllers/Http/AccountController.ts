@@ -4,7 +4,7 @@ import PasswordReset from "App/Models/Redis/PasswordReset";
 import User from "App/Models/User";
 
 export default class AccountController {
-  public async getUserDetails({auth, request, response}){
+  public async getUserDetails({auth, response}){
     const { UserId } = await auth.user!;
     const user = await User.find(UserId);
     if (!user) {
