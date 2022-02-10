@@ -29,4 +29,10 @@ export default class ErrorMessage {
     },
     EmailNotFound: this.err("No user found with this email."),
   };
+
+
+  public static SMS = {
+    CodeInvalid: this.err("This code is expired or invalid."),
+    
+  }
 }
