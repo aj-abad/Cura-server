@@ -13,7 +13,6 @@ import { v4 as uuid } from "uuid";
 
 export default class User extends BaseModel {
   public static selfAssignPrimaryKey = true;
-
   public shouldHashPassword = true;
 
   @column({
@@ -44,6 +43,9 @@ export default class User extends BaseModel {
 
   @column()
   public ProfileImage: string;
+
+  @column.dateTime({ serialize: (date: DateTime) => date?.toISODate() ?? null })
+  public BirthDate: DateTime;
 
   @column.dateTime({
     serializeAs: null,
