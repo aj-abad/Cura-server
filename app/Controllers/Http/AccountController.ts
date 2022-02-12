@@ -4,7 +4,7 @@ import PasswordReset from "App/Models/Redis/PasswordReset";
 import User from "App/Models/User";
 
 export default class AccountController {
-  public async getUserDetails({auth, response}){
+  public async getUserDetails({ auth, response }) {
     const { UserId } = await auth.user!;
     const user = await User.find(UserId);
     if (!user) {
@@ -12,30 +12,27 @@ export default class AccountController {
     }
     return response.ok(user);
   }
-  
-  
+
   public async setup({ auth, request, response }) {
     const { UserId } = await auth.user!;
-    const {firstName, lastName, birthDate} = request.all();
+    const { firstName, lastName, birthDate } = request.all();
 
     //Check user status from database
-    const user = await User.find(UserId);
-    user!.FirstName = firstName;
-    user!.LastName = lastName;
-    user!.UserStatusId = UserStatus.Active;
-    await user!.save();
+    const user = await User.findOrFail(UserId);
+    user.merge({
+      FirstName: firstName,
+      LastName: lastName,
+      UserStatusId: UserStatus.Active,
+    });
+    await user.save();
+    //TODO if user has profile picture, upload and update record
+
     return response.created();
   }
 
   public async setMobile({ auth, request, response }) {
-    const { UserId } = await auth.user!;
+    const user = auth.user!;
     const mobile = request.input("mobile");
-
-    //Check user status from database
-    const user = await User.find(UserId);
-    if (!user) {
-      return response.unauthorized();
-    }
     user.Mobile = mobile;
     await user.save();
     return response.created();
