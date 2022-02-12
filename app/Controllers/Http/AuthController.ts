@@ -113,7 +113,7 @@ export default class AuthController {
     //Delete pending signup record in Redis and create user in DB
     Redis.del(signupKey);
     const { Email, Password } = matchedSignupUser;
-    const newUser = await new User()
+    const user = await new User()
       .merge({
         shouldHashPassword: false,
         Email,
@@ -122,11 +122,12 @@ export default class AuthController {
         Password,
       })
       .save();
-    const token = await auth
+    const { token } = await auth
       .use("api")
-      .generate(newUser, { expiresIn: "7days" });
-    return response.created({ token });
+      .generate(user, { expiresIn: "7days" });
+    return response.created({ user, token: `Bearer ${token}` });
   }
+
   public async signIn({ auth, request, response }) {
     const email = request.input("email")?.toLowerCase().trim();
     const password = request.input("password");
