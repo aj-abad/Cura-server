@@ -9,6 +9,9 @@ const from = {
   name: Env.get("SENDGRID_SENDER_NAME"),
 };
 
+enum EmailTemplate {
+  VerifyEmail = "d-9e13297c99504d71ae41dea203a38c88",
+}
 export default class EmailUtils {
   public static sendSignupVerificationMail(
     recipient: string,
@@ -19,7 +22,7 @@ export default class EmailUtils {
     const msg = {
       to: recipient,
       from,
-      templateId: "d-9e13297c99504d71ae41dea203a38c88",
+      templateId: EmailTemplate.VerifyEmail,
       dynamicTemplateData: {
         code,
         year,
