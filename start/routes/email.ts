@@ -1,12 +1,15 @@
 import Route from "@ioc:Adonis/Core/Route";
 
 Route.group(() => {
+  
   Route.post(
     "resendverificationmail",
     "EmailController.resendVerificationMail"
-  ).middleware(["validateAndSanitizeEmail"]);
+  ).middleware(["validate:email"]);
+  
   Route.post(
     "sendpasswordresetmail",
     "EmailController.sendPasswordResetMail"
-  ).middleware(["validateAndSanitizeEmail"]);
+  ).middleware(["validate:email"]);
+  
 }).prefix("email");
