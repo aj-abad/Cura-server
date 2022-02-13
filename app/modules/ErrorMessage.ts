@@ -19,6 +19,7 @@ export default class ErrorMessage {
   public static Auth = {
     InvalidCredentials: this.err("These credentials don't match our records."),
     UserTypeMismatch: this.err("This account is for a different Cura app."),
+    MustSignUpAsCustomer: this.err("You may only sign up using the Cura customer app."),
     EmailInUse: this.err("This email address is already in use."),
     CodeInvalid: this.err("This code is expired or invalid."),
   };
