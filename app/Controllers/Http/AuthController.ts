@@ -9,23 +9,27 @@ import Hash from "@ioc:Adonis/Core/Hash";
 import EmailUtils from "App/Modules/EmailUtils";
 import StringHelpers from "App/Modules/StringHelpers";
 import UserStatus from "App/Enums/UserStatus";
+import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 export default class AuthController {
-  public async checkEmail({ request, response }) {
-    const email = request.input("email");
-    const userType = parseInt(request.input("userType"));
-    if (!Object.values(UserType).includes(userType)) {
-      return response.badRequest();
-    }
+  private appUserType(request): UserType {
+    const app = request.header("App").split(" - ")[0];
+    const appNames = Env.get("CLIENT_APP_NAMES")
+      .split(",")
+      .map((appName) => appName.split(":"))
+      .map((appName) => ({ userType: parseInt(appName[0]), app: appName[1] }));
+    return appNames.find((appName) => appName.app === app)?.userType;
+  }
 
+  public async checkEmail({ request, response }: HttpContextContract) {
+    const email = request.input("email");
     const matchedUser = await User.findBy("Email", email);
+    if (this.appUserType(request) !== matchedUser?.UserTypeId)
+      return response.unauthorized(ErrorMessage.Auth.UserTypeMismatch);
+  
     const emailExists = !!matchedUser;
     if (!matchedUser) {
       return { emailExists };
-    }
-
-    if (matchedUser.UserTypeId !== userType) {
-      return response.badRequest(ErrorMessage.Validation.PasswordTooShort);
     }
     return { emailExists };
   }
@@ -33,7 +37,10 @@ export default class AuthController {
   public async signUp({ request, response }) {
     const email = request.input("email");
     const password = request.input("password");
-
+    if (this.appUserType(request) !== UserType.Customer)
+      return response.unauthorized(ErrorMessage.Auth.MustSignUpAsCustomer);
+    
+    
     if (password?.length < 6)
       return response.badRequest(ErrorMessage.Validation.PasswordTooShort);
     if (password?.length > 128)
@@ -142,6 +149,10 @@ export default class AuthController {
     if (!isPasswordValid) {
       return response.unauthorized(ErrorMessage.Auth.InvalidCredentials);
     }
+
+    if (user.UserTypeId !== this.appUserType(request))
+      return response.unauthorized(ErrorMessage.Auth.UserTypeMismatch);
+
 
     // verified
     const { token } = await auth
