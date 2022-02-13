@@ -42,4 +42,5 @@ Server.middleware.registerNamed({
   auth: () => import("App/Middleware/Auth"),
   validate: () => import("App/Middleware/Validate"),
   userStatus: () => import("App/Middleware/AuthorizeUserStatus"),
+  userType: () => import("App/Middleware/AuthorizeUserType"),
 });
